@@ -1,1 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>漢和辞典 ページ検索</title>
+    <meta name="robots" content="noindex,nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+
+    <!-- ★ Supabase を使うためのコード（これ超重要）★ -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div id="login-container">
+        <h2>パスワードを入力してください</h2>
+        <input type="password" id="passInput" placeholder="パスワードを入力">
+        <button onclick="checkPassword()">ログイン</button>
+        <p id="login-message"></p>
+    </div>
+
+    <div id="search-container" style="display:none;">
+        <h1>漢字のページ数検索</h1>
+        <p>複数の漢字はスペースで区切ってください（例：坂 砂）</p>
+        <input type="text" id="searchInput" placeholder="検索したい漢字を入力">
+        <button id="searchButton" onclick="searchKanji()">検索</button>
+        <div id="result"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
 
