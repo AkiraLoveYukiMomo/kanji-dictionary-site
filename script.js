@@ -1,49 +1,12 @@
-// =========================
-//  🔐 パスワード認証部分
-// =========================
-
-// ログインで使うパスワード（ハッシュ化されたやつ）
-const HASHED_PASSWORD = "eab9862175afae2661a64aa00e2ee73f2f8d00d27f9a5e276c45bb8915cb242e";
-
-// 入力パスワードをチェック
-async function checkPassword() {
-    const input = document.getElementById('passInput').value;
-    const hashedInput = await hashString(input);
-    const loginMessage = document.getElementById('login-message');
-
-    if (hashedInput === HASHED_PASSWORD) {
-        document.getElementById('login-container').style.display = 'none';
-        document.getElementById('search-container').style.display = 'block';
-    } else {
-        loginMessage.textContent = 'パスワードが違います。';
-    }
-}
-
-// SHA-256
-async function hashString(str) {
-    const data = new TextEncoder().encode(str);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-
-
-// =========================
-//  🔌 Supabase 接続設定
-// =========================
-
+// ーーー Supabase 接続設定 ーーー
 const SUPABASE_URL = "https://ezmeralrtkicxbfmaocw.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6bWVyYWxydGtpY3hiZm1hb2N3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0MzQxOTUsImV4cCI6MjA4MTAxMDE5NX0.QreLL2vOhRe1U-zR-UkKtdKwY0F1CtvsRDCgy1vA1W4";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6bWVyYWxydGtpY3hiZm1hb2N3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0MzQxOTUsImV4cCI6MjA4MTAxMDE5NX0.QreLL2vOhRe1U-zR-UkKtdKwY0F1CtvsRDCgy1vA1W4";
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// ----ここから下は検索処理の実装----
 
-
-// =========================
-//  🔍 漢字検索（Supabase版）
-// =========================
-
+// Supabase からデータを読み込む検索関数
 async function searchKanji() {
     const input = document.getElementById("searchInput").value.trim();
     const resultDiv = document.getElementById("result");
@@ -54,31 +17,27 @@ async function searchKanji() {
         return;
     }
 
-    const kanjiList = input.split(/[\s　\t]+/).filter(x => x.length > 0);
-    let output = [];
+    const kanjiList = input.split(/\s+/);
 
     for (const kanji of kanjiList) {
-
-        // Supabase で検索！
-        const { data, error } = await supabase
+        const { data, error } = await client
             .from("kanji_pages")
-            .select("page")
+            .select("*")
             .eq("kanji", kanji)
-            .maybeSingle();
+            .single();
 
-        if (error) {
-            console.error(error);
-            output.push(`「${kanji}」の検索中にエラーが発生しました。`);
-            continue;
-        }
+        const p = document.createElement("p");
 
-        if (data) {
-            output.push(`「${kanji}」は【${data.page}】ページにあります。`);
+        if (error || !data) {
+            p.innerHTML = `『${kanji}』 → 見つかりません`;
         } else {
-            output.push(`「${kanji}」は見つかりませんでした。`);
+            p.innerHTML = `『${kanji}』 → <b>${data.page}ページ</b>`;
         }
-    }
 
-    resultDiv.innerHTML = output.join("<br>");
+        resultDiv.appendChild(p);
+    }
 }
 
+// データ読み込み完了メッセージ
+document.getElementById("searchButton").disabled = false;
+document.getElementById("searchButton").textContent = "検索";
