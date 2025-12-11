@@ -1,34 +1,33 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <title>漢和辞典 ページ検索</title>
-    <meta name="robots" content="noindex,nofollow">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-
-    <!-- ★ Supabase を使うためのコード（これ超重要）★ -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8">
+  <title>漢字のページ数検索</title>
 </head>
 <body>
-    <div id="login-container">
-        <h2>パスワードを入力してください</h2>
-        <input type="password" id="passInput" placeholder="パスワードを入力">
-        <button onclick="checkPassword()">ログイン</button>
-        <p id="login-message"></p>
-    </div>
+  <h1>漢字ページ検索（完全防御版）</h1>
 
-    <div id="search-container" style="display:none;">
-        <h1>漢字のページ数検索</h1>
-        <p>複数の漢字はスペースで区切ってください（例：坂 砂）</p>
-        <input type="text" id="searchInput" placeholder="検索したい漢字を入力">
-        <button id="searchButton" onclick="searchKanji()">検索</button>
-        <div id="result"></div>
-    </div>
-    
-　　<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <p>スペース区切りで入力（例：坂 砂）</p>
+  <input id="input" type="text" placeholder="漢字を入力">
+  <button id="searchBtn">検索</button>
 
-    <script src="script.js"></script>
+  <div id="result"></div>
+
+  <script>
+    document.getElementById('searchBtn').addEventListener('click', async () => {
+      const text = document.getElementById('input').value.trim();
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = "検索中...";
+
+      const res = await fetch('/api/search', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ text })
+      });
+
+      const data = await res.json();
+      resultDiv.innerHTML = data.result;
+    });
+  </script>
 </body>
 </html>
-
